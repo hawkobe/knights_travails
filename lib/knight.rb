@@ -1,12 +1,13 @@
 require_relative 'board.rb'
 
 class Knight
+  attr_accessor :graph
   MOVES = [[2, 1], [1, 2], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]]
 
   def initialize(location = nil)
     @location = location
     @move_history = []
-    @graph = Graph.new
+    @graph = create_graph(@location)
   end
 
   # set up what moves the knight can make
@@ -33,39 +34,42 @@ class Knight
     end
   end
 
-  def create_graph(start_loc, end_loc)
+  def create_graph(start_loc)
     node = GraphVertex.new(start_loc)
+    @move_history << start_loc
+    # return queue[0] if queue[0] == end_loc
 
-    return if node.value == end_loc
+    # queue.shift
     
     MOVES.each do |move|
       if is_valid?(start_loc[0] + move[0], start_loc[1] + move[1])
-        node.add_edge([start_loc[0] + move[0], start_loc[1] + move[1]])
-        @graph.add_node([start_loc[0] + move[0], start_loc[1] + move[1]])
-        create_graph([start_loc[0] + move[0], start_loc[1] + move[1]], end_loc)
+        node.neighbors << GraphVertex.new([start_loc[0] + move[0], start_loc[1] + move[1]])
+        node.neighbors[node.neighbors.length - 1] create_graph([start_loc[0] + move[0], start_loc[1] + move[1]])
       end
-
-      # if (1..8).include?(start_loc[0] + move[0]) && (1..8).include?(start_loc[1] + move[1])
-      #   node.add_edge([(start_loc[0] + move[0]), (start_loc[1] + move[1])])
-      # end
     end
 
+    p node.neighbors
+    # create_graph(start_loc, end_loc)
 
     # need to add a queue of some sort
 
-    # @graph.add_node(root)
-
-    p @graph.nodes
-
-    # node.neighbors.each do |neighbor|
-    #   return if neighbor == end_loc
-    #   create_graph(neighbor, end_loc)
-    # end
+    node
   end
 
   def knight_moves(start_loc, end_loc)
     # will call build tree function first
   end
+
+  def level_order(node = @graph, queue = [], arr_to_return = [])
+    # return arr_to_return if queue.empty?
+    
+    queue << node.nodes[0]
+
+    p queue
+
+  end
+
+    
 end
 
 class Graph
@@ -94,7 +98,9 @@ class GraphVertex
   end
 end
 
-Knight.new.create_graph([1,1])
+knight = Knight.new([1, 1])
+
+# p knight.graph
 
 
 
