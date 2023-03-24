@@ -4,10 +4,10 @@ class Knight
   attr_accessor :graph
   MOVES = [[2, 1], [1, 2], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]]
 
-  def initialize(location = nil)
+  def initialize(location, end_loc)
     @location = location
     @move_history = []
-    @graph = create_graph(@location)
+    @graph = create_graph(@location, end_loc)
   end
 
   # set up what moves the knight can make
@@ -34,24 +34,38 @@ class Knight
     end
   end
 
-  def create_graph(start_loc)
+  def create_graph(start_loc, end_loc, queue = [@graph])
     node = GraphVertex.new(start_loc)
     @move_history << start_loc
-    # return queue[0] if queue[0] == end_loc
+    return if node.value == end_loc
 
     # queue.shift
     
     MOVES.each do |move|
       if is_valid?(start_loc[0] + move[0], start_loc[1] + move[1])
-        node.neighbors << GraphVertex.new([start_loc[0] + move[0], start_loc[1] + move[1]])
-        node.neighbors[node.neighbors.length - 1] create_graph([start_loc[0] + move[0], start_loc[1] + move[1]])
+        node.add_edge(create_graph([start_loc[0] + move[0], start_loc[1] + move[1]], end_loc))
+        # queue << [start_loc[0] + move[0], start_loc[1] + move[1]]
       end
     end
 
-    p node.neighbors
-    # create_graph(start_loc, end_loc)
+    # p queue
+    # p node
 
-    # need to add a queue of some sort
+    # create_graph(queue[0], end_loc, queue)
+
+    # return if queue.empty?
+    # node = GraphVertex.new(start_loc)
+    # @move_history << start_loc
+
+    # queue.shift
+    
+    # MOVES.each do |move|
+    #   if is_valid?(start_loc[0] + move[0], start_loc[1] + move[1])
+    #     node.add_edge(GraphVertex.new([start_loc[0] + move[0], start_loc[1] + move[1]]))
+    #     queue << [start_loc[0] + move[0], start_loc[1] + move[1]]
+    #   end
+    # end
+    # create_graph(queue[0], queue)
 
     node
   end
@@ -60,13 +74,9 @@ class Knight
     # will call build tree function first
   end
 
-  def level_order(node = @graph, queue = [], arr_to_return = [])
-    # return arr_to_return if queue.empty?
+  def level_order(node = @graph, queue = [@graph], arr_to_return = [])
+    return arr_to_return if queue.empty?
     
-    queue << node.nodes[0]
-
-    p queue
-
   end
 
     
@@ -98,9 +108,10 @@ class GraphVertex
   end
 end
 
-knight = Knight.new([1, 1])
+knight = Knight.new([1, 1], [2, 3])
 
-# p knight.graph
+p knight.graph.neighbors
+
 
 
 
