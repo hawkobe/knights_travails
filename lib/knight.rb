@@ -1,30 +1,13 @@
 require_relative 'board.rb'
+require 'pry-byebug'
 
 class Knight
   attr_accessor :graph
   MOVES = [[2, 1], [1, 2], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]]
 
-  def initialize(location, end_loc)
-    @location = location
+  def initialize
     @move_history = []
-    @graph = create_graph(@location, end_loc)
   end
-
-  # set up what moves the knight can make
-
-  # create a graph of moves that are connected to
-  # the space that the knight is in
-
-  # need to figure out which graph I will use
-  # Graph options:
-  # Adjacent Matrix
-  # Adjacent List
-  # Edge List
-
-  # directed acyclic graph
-
-  # need a history of where the knight
-  # has been so it doesn't get caught in a loop
   
   def is_valid?(x_position, y_position)
     if x_position.between?(1, 8) && y_position.between?(1, 8) && !@move_history.include?([x_position, y_position])
@@ -34,73 +17,48 @@ class Knight
     end
   end
 
-  def create_graph(start_loc, end_loc, queue = [@graph])
-    node = GraphVertex.new(start_loc)
-    @move_history << start_loc
-    return if node.value == end_loc
-
-    # queue.shift
+  def create_graph(start_loc, end_loc, queue = [])
+    start_loc.is_a?(Array) ? node = GraphVertex.new(start_loc) : node = start_loc
+    @move_history << node.value
+    return node if node.value == end_loc
     
-    MOVES.each do |move|
-      if is_valid?(start_loc[0] + move[0], start_loc[1] + move[1])
-        node.add_edge(create_graph([start_loc[0] + move[0], start_loc[1] + move[1]], end_loc))
-        # queue << [start_loc[0] + move[0], start_loc[1] + move[1]]
+    MOVES.map do |move|
+      if is_valid?(node.value[0] + move[0], node.value[1] + move[1])
+        node.add_edge(GraphVertex.new([node.value[0] + move[0], node.value[1] + move[1]], node))
+        queue << GraphVertex.new([node.value[0] + move[0], node.value[1] + move[1]], node)
       end
     end
-
-    # p queue
-    # p node
-
-    # create_graph(queue[0], end_loc, queue)
-
-    # return if queue.empty?
-    # node = GraphVertex.new(start_loc)
-    # @move_history << start_loc
-
-    # queue.shift
-    
-    # MOVES.each do |move|
-    #   if is_valid?(start_loc[0] + move[0], start_loc[1] + move[1])
-    #     node.add_edge(GraphVertex.new([start_loc[0] + move[0], start_loc[1] + move[1]]))
-    #     queue << [start_loc[0] + move[0], start_loc[1] + move[1]]
-    #   end
-    # end
-    # create_graph(queue[0], queue)
+    queue.shift
+    node = create_graph(queue[0], end_loc, queue)
 
     node
   end
 
   def knight_moves(start_loc, end_loc)
-    # will call build tree function first
+    move_sequence = level_order(create_graph(start_loc, end_loc))
+
+    puts "You made it in #{move_sequence.length - 1} moves!"
+
+    puts "Here is your path:"
+    move_sequence.reverse.each { |space| p space }
   end
 
-  def level_order(node = @graph, queue = [@graph], arr_to_return = [])
-    return arr_to_return if queue.empty?
-    
+  def level_order(node, arr_to_return = [])
+    return arr_to_return if node == nil
+
+    arr_to_return << node.value
+
+    level_order(node.parent, arr_to_return)
   end
-
-    
-end
-
-class Graph
-  attr_accessor :nodes
-
-  def initialize
-    @nodes = []
-  end
-
-  def add_node(value)
-    @nodes << GraphVertex.new(value)
-  end
-
 end
 
 class GraphVertex
-  attr_accessor :value, :neighbors
+  attr_accessor :value, :neighbors, :parent
 
-  def initialize(value)
+  def initialize(value, parent = nil)
     @value = value
     @neighbors = []
+    @parent = parent
   end
 
   def add_edge(neighbor)
@@ -108,11 +66,7 @@ class GraphVertex
   end
 end
 
-knight = Knight.new([1, 1], [2, 3])
-
-p knight.graph.neighbors
-
-
+Knight.new.knight_moves([1, 1], [4, 4])
 
 
 
