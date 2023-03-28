@@ -1,6 +1,4 @@
 # frozen_string_literal: true
-
-require_relative 'board'
 require 'pry-byebug'
 
 class Knight
@@ -67,4 +65,4 @@ class GraphVertex
   end
 end
 
-Knight.new.knight_moves([1, 1], [4, 4])
+Knight.new.knight_moves([4, 4], [5, 4])
