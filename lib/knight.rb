@@ -20,9 +20,9 @@ class Knight
   def create_graph(start_loc, end_loc, queue = [])
     start_loc.is_a?(Array) ? node = GraphVertex.new(start_loc) : node = start_loc
     @move_history << node.value
-    return node if node.value == end_loc
+    return level_order(node) if node.value == end_loc
     
-    MOVES.map do |move|
+    MOVES.each do |move|
       if is_valid?(node.value[0] + move[0], node.value[1] + move[1])
         node.add_edge(GraphVertex.new([node.value[0] + move[0], node.value[1] + move[1]], node))
         queue << GraphVertex.new([node.value[0] + move[0], node.value[1] + move[1]], node)
@@ -35,16 +35,16 @@ class Knight
   end
 
   def knight_moves(start_loc, end_loc)
-    move_sequence = level_order(create_graph(start_loc, end_loc))
+    move_sequence = create_graph(start_loc, end_loc)
 
     puts "You made it in #{move_sequence.length - 1} moves!"
 
     puts "Here is your path:"
-    move_sequence.reverse.each { |space| p space }
+    move_sequence.each { |space| p space }
   end
 
   def level_order(node, arr_to_return = [])
-    return arr_to_return if node == nil
+    return arr_to_return.reverse if node == nil
 
     arr_to_return << node.value
 
